@@ -1,8 +1,16 @@
 import sqlite3
 
+
+# function for lower register
+def lower_string(_str):
+    return _str.lower()
+
+
 conn = sqlite3.connect('SQLiteDB/AutoHome.db')
 
 cursor = conn.cursor()
+
+conn.create_function("lower_s", 1, lower_string)
 
 
 # Create table for tabs in tree
@@ -20,9 +28,9 @@ def create_table_tab():
                 ('Amounts and debts on documents', 'Reports', 3),
                 ('Sales by product', 'Reports', 4),
                 ('Repairs by group', 'Reports', 5),
-                ('Payments by storage locations', 'Reports', 5),
-                ('Profit by month', 'Reports', 5),
-                ('Payments', 'Reports', 5),
+                ('Payments by storage locations', 'Reports', 6),
+                ('Profit by month', 'Reports', 7),
+                ('Payments', 'Reports', 8),
                 ('Shop', '', 0),
                 ('Sale of goods', 'Shop', 0),
                 ('Provision of the goods', 'Shop', 1),
@@ -38,6 +46,7 @@ def create_table_tab():
                 ('Providers', 'Guides', 6),
                 ('Users', 'Guides', 7),
                 ('Our company', 'Guides', 8),
+                ('Clients', 'Guides', 9),
                 ('Car service', '', 0),
                 ('Opening a work order', 'Car service', 0),
                 ('Closed orders', 'Car service', 1),
@@ -83,11 +92,12 @@ def create_table_localization_tab():
                 ('tab', 23, 'Providers', 'Поставщики'),
                 ('tab', 24, 'Users', 'Пользователи'),
                 ('tab', 25, 'Our company', 'Наши компании'),
-                ('tab', 26, 'Car service', 'Автосервис'),
-                ('tab', 27, 'Opening a work order', 'Открытие заказ-наряда'),
-                ('tab', 28, 'Closed orders', 'Все заказ-наряды'),
-                ('tab', 29, 'Post planner', 'Планировщик постов'),
-                ('tab', 30, 'Posts', 'Посты')]
+                ('tab', 26, 'Clients', 'Клиенты'),
+                ('tab', 27, 'Car service', 'Автосервис'),
+                ('tab', 28, 'Opening a work order', 'Открытие заказ-наряда'),
+                ('tab', 29, 'Closed orders', 'Все заказ-наряды'),
+                ('tab', 30, 'Post planner', 'Планировщик постов'),
+                ('tab', 31, 'Posts', 'Посты')]
 
     cursor.executemany("""insert into LocalizationTab 
                             (table_tab, id_tab, element, element_ru)
@@ -159,6 +169,48 @@ def create_table_car():
                     created text)""")
 
 
+# Create table for goods
+# product_name - название, category - категория,
+# article - артикул, unit_measurement - единица измерения,
+# quantity_per_pack - количество в упаковке, remains - остаток,
+# reserve - резерв, minimum_balance - минимальный остаток,
+# up_minimum_remaining_balance - осталось до минимального остатка,
+# purchase_price - цена закупки, margin_percentage - процент наценки,
+# cost_stock_purchase - стоимость остатков по закупке,
+# sale_price - цена продажи, mark_up_amount - сумма наценки,
+# cost_sales_balances - стоимость остатков по продаже
+# description - описание, image - изображение товара
+def create_table_goods():
+    cursor.execute("""create table Goods
+                    (id integer not null primary key,
+                    product_name text,
+                    category text,
+                    article text,
+                    unit_measurement text,
+                    quantity_per_pack integer,
+                    remains integer,
+                    reserve integer,
+                    minimum_balance integer,
+                    up_minimum_remaining_balance integer,
+                    purchase_price text,
+                    margin_percentage text,
+                    cost_stock_purchase text,
+                    sale_price text,
+                    mark_up_amount text,
+                    cost_sales_balances text,
+                    description text,
+                    image blob)""")
+
+
+# Create table for category goods
+def create_table_category_goods():
+    cursor.execute("""create table Category_goods
+                    (id integer not null primary key,
+                    element text,
+                    parent text,
+                    element_number integer)""")
+
+
 # Outputs everything from the tab table
 def sel_from_tab():
     cursor.execute("""select tab.*, lt.element_ru
@@ -191,7 +243,7 @@ def sel_from_clients_by_client(client):
                       left join (select client, license_plate_number, (mark || ' ' || model) as mark_model
                                  from Car) c
                         on cl.client = c.client
-                      where cl.client like ?
+                      where lower_s(cl.client) like lower_s(?)
                       group by cl.id""", (('%{}%'.format(client)),))
 
     return cursor.fetchall()
@@ -218,6 +270,14 @@ def sel_client_from_clients_by_id(id_client):
 # Outputs client from Clients table
 def sel_client_from_clients():
     cursor.execute("""select client
+                    from Clients""")
+
+    return cursor.fetchall()
+
+
+# Outputs phone_number from Client table
+def sel_phone_number_from_client():
+    cursor.execute("""select phone_number
                     from Clients""")
 
     return cursor.fetchall()
@@ -321,6 +381,212 @@ def sel_model_from_car_by_mark(mark):
         return ''
 
 
+# Outputs license plate number from Car table
+def sel_license_plate_number_from_car():
+    cursor.execute("""select license_plate_number
+                    from Car""")
+
+    return cursor.fetchall()
+
+
+# Outputs goods from Goods table by category
+def sel_from_goods_by_category(category):
+    if category != '':
+        cursor.execute("""select id, product_name, article, 
+                            sale_price, remains, unit_measurement,
+                            up_minimum_remaining_balance,
+                            minimum_balance, reserve
+                          from Goods
+                          where category=?""", (category,))
+
+        return cursor.fetchall()
+    else:
+        return ''
+
+
+# Outputs all from Goods table by id
+def sel_all_goods_by_id(id_cat):
+    cursor.execute("""select *
+                    from Goods
+                    where id=?""", (id_cat,))
+
+    return cursor.fetchall()
+
+
+# Outputs category from Goods table by id
+def sel_category_goods_by_id(id_element):
+    cursor.execute("""select category
+                    from Goods
+                    where id=?""", (id_element,))
+
+    return cursor.fetchall()
+
+
+# Outputs article from Goods table
+def sel_article_goods():
+    cursor.execute("""select article
+                    from Goods""")
+
+    return cursor.fetchall()
+
+
+# Outputs product name from Goods table by category
+def sel_prod_name_goods_by_category(category):
+    cursor.execute("""select id, product_name
+                    from Goods
+                    where category=?""", (category,))
+
+    return cursor.fetchall()
+
+
+# Outputs product name, unit_measurement,
+# article, sale_price
+def sel_for_price_tag(id_product):
+    cursor.execute("""select product_name, unit_measurement,
+                             id, sale_price
+                    from Goods
+                    where id=?""", (id_product,))
+
+    return cursor.fetchall()
+
+
+# Outputs category from Category_goods table
+def sel_category_category_goods():
+    cursor.execute("""select element
+                    from Category_goods""")
+
+    return cursor.fetchall()
+
+
+# Outputs all category goods from Category_goods table
+def sel_from_category_goods():
+    cursor.execute("""select *
+                    from Category_goods""")
+
+    return cursor.fetchall()
+
+
+# Outputs max element number from Category_goods table by parent
+def sel_max_number_category_goods(parent):
+    cursor.execute("""select max(element_number)
+                    from Category_goods
+                    where parent=?""", (parent,))
+
+    return cursor.fetchall()
+
+
+# Outputs element from Category_goods table
+def sel_element_category_goods():
+    cursor.execute("""select element
+                    from Category_goods""")
+
+    return cursor.fetchall()
+
+
+# outputs element from Category_goods where parent = ''
+def sel_element_category_goods_by_parent():
+    cursor.execute("""select element
+                    from Category_goods
+                    where parent=''""")
+
+    return cursor.fetchall()
+
+
+# outputs all from Category_goods where parent = ''
+def sel_all_category_goods_by_parent():
+    cursor.execute("""select *
+                    from Category_goods
+                    where parent=''""")
+
+    return cursor.fetchall()
+
+
+# outputs all from Category_goods where parent != ''
+def sel_all_category_goods_by_parent_2():
+    cursor.execute("""select *
+                    from Category_goods
+                    where parent<>''""")
+
+    return cursor.fetchall()
+
+
+# Outputs goods from Goods table by product name
+def sel_from_goods_by_product_name(product, category):
+    if product != '':
+        if category == '':
+            cursor.execute("""select id, product_name, article, 
+                                sale_price, remains, unit_measurement,
+                                up_minimum_remaining_balance,
+                                minimum_balance, reserve
+                            from Goods
+                            where lower_s(product_name) like lower_s(?)""", (('%{}%'.format(product)),))
+
+            result = cursor.fetchall()
+
+            cursor.execute("""select id, product_name, article, 
+                                sale_price, remains, unit_measurement,
+                                up_minimum_remaining_balance,
+                                minimum_balance, reserve
+                            from Goods
+                            where id = ?""", (product,))
+
+            for k in cursor.fetchall():
+                if k not in result:
+                    result.append(k)
+
+            cursor.execute("""select id, product_name, article, 
+                                sale_price, remains, unit_measurement,
+                                up_minimum_remaining_balance,
+                                minimum_balance, reserve
+                            from Goods
+                            where article = ?""", (product,))
+
+            for k in cursor.fetchall():
+                if k not in result:
+                    result.append(k)
+
+            return result
+        else:
+            cursor.execute("""select id, product_name, article, 
+                                sale_price, remains, unit_measurement,
+                                up_minimum_remaining_balance,
+                                minimum_balance, reserve
+                               from Goods
+                               where lower_s(product_name) like lower_s(?)
+                               and category=?""",
+                           (('%{}%'.format(product)), category))
+
+            result = cursor.fetchall()
+
+            cursor.execute("""select id, product_name, article, 
+                                sale_price, remains, unit_measurement,
+                                up_minimum_remaining_balance,
+                                minimum_balance, reserve
+                            from Goods
+                            where id = ?
+                            and category=?""", (product, category))
+
+            for k in cursor.fetchall():
+                if k not in result:
+                    result.append(k)
+
+            cursor.execute("""select id, product_name, article, 
+                                sale_price, remains, unit_measurement,
+                                up_minimum_remaining_balance,
+                                minimum_balance, reserve
+                            from Goods
+                            where article = ?
+                            and category=?""", (product, category))
+
+            for k in cursor.fetchall():
+                if k not in result:
+                    result.append(k)
+
+            return result
+    else:
+        return ''
+
+
 # insert in table Clients
 def ins_Client(client):
     cursor.execute("""insert into Clients(client, type_client, category, source, discount_on_works, 
@@ -330,7 +596,6 @@ def ins_Client(client):
                                         korr_account, note)
                         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
                         ?, ?, ?)""", client)
-
     conn.commit()
 
 
@@ -341,7 +606,29 @@ def ins_Car(car):
                                       unit_mileage_measurement, color, body_number, engine_number,
                                       client, created)
                         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", car)
+    conn.commit()
 
+
+# insert in table Category_goods
+def ins_Category_goods(category_goods):
+    cursor.execute("""insert into Category_goods(element, parent, element_number)
+                    values (?, ?, ?)""", category_goods)
+
+    conn.commit()
+
+
+# insert in table Goods
+def ins_Goods(product):
+    cursor.execute("""insert into Goods(product_name, category,
+                        article, unit_measurement,
+                        quantity_per_pack, remains,
+                        reserve, minimum_balance,
+                        up_minimum_remaining_balance,
+                        purchase_price, margin_percentage,
+                        cost_stock_purchase, sale_price,
+                        mark_up_amount, cost_sales_balances,
+                        description, image)
+                       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", product)
     conn.commit()
 
 
@@ -354,6 +641,18 @@ def upd_Clients(client):
                             send_sms=?, send_e_mail=?, inn=?, kpp=?, ogrn=?, okpo=?, okved=?, oktmo=?,
                             bank=?, bik=?, r_s=?, korr_account=?, note=?
                         where id=?""", client)
+    conn.commit()
+
+
+# update row in Client table by phone_number
+def upd_Client_by_phone_number(phone_number):
+    cursor.execute("""update Clients
+                        set client=?, type_client=?, category=?, source=?, discount_on_works=?, 
+                            discount_on_products=?, phone_number=?, another_phone_number=?, 
+                            e_mail=?, address=?, site=?, social_networking=?, problem_client=?, 
+                            send_sms=?, send_e_mail=?, inn=?, kpp=?, ogrn=?, okpo=?, okved=?, oktmo=?,
+                            bank=?, bik=?, r_s=?, korr_account=?, note=?
+                    where phone_number=?""", phone_number)
 
     conn.commit()
 
@@ -366,6 +665,78 @@ def upd_Car(car):
                             unit_mileage_measurement=?, color=?, body_number=?, engine_number=?,
                             client=?, created=?
                         where id=?""", car)
+    conn.commit()
+
+
+# update row in Car table by license plate number
+def upd_Car_by_license_plate_number(car):
+    cursor.execute("""update Car
+                        set mark=?, model=?, license_plate_number=?, vin=?, year_release=?, engine=?,
+                            gearbox=?, body_car=?, machine_drive=?, right_hand_drive=?, 
+                            unit_mileage_measurement=?, color=?, body_number=?, engine_number=?,
+                            client=?, created=?
+                        where license_plate_number=?""", car)
+    conn.commit()
+
+
+# update element in Category_goods table
+def upd_Category_goods_by_element(new_element, element):
+    cursor.execute("""update Category_goods
+                        set parent=?
+                        where parent=?""", (new_element, element))
+
+    cursor.execute("""update Goods
+                    set category=?
+                    where category=?""", (new_element, element))
+
+    cursor.execute("""update Category_goods
+                    set element=?
+                    where element=?""", (new_element, element))
+
+    conn.commit()
+
+
+# update row in Goods table
+def upd_Goods(product):
+    cursor.execute("""update Goods
+                        set product_name=?, category=?,
+                        article=?, unit_measurement=?,
+                        quantity_per_pack=?, remains=?,
+                        reserve=?, minimum_balance=?,
+                        up_minimum_remaining_balance=?,
+                        purchase_price=?, margin_percentage=?,
+                        cost_stock_purchase=?, sale_price=?,
+                        mark_up_amount=?, cost_sales_balances=?,
+                        description=?, image=?
+                      where id=?""", product)
+
+    conn.commit()
+
+
+# update row in Goods table by article
+def upd_Goods_by_article(product):
+    cursor.execute("""update Goods
+                        set product_name=?, category=?,
+                        article=?, unit_measurement=?,
+                        quantity_per_pack=?, remains=?,
+                        reserve=?, minimum_balance=?,
+                        up_minimum_remaining_balance=?,
+                        purchase_price=?, margin_percentage=?,
+                        cost_stock_purchase=?, sale_price=?,
+                        mark_up_amount=?, cost_sales_balances=?,
+                        description=?, image=?
+                      where article=?""", product)
+
+    conn.commit()
+
+
+# swapping the rows in Category_goods table
+def swap_rows_Category_goods(element_1, element_2):
+    cursor.execute("""update Category_goods
+                    set element=(case when element=? then ? else ? end)
+                    where element in (?,?)""", (element_1, element_2,
+                                                element_1, element_1,
+                                                element_2))
 
     conn.commit()
 
@@ -374,7 +745,6 @@ def upd_Car(car):
 def del_row_Clients(id_client):
     cursor.execute("""delete from Clients
                         where id=?""", (id_client,))
-
     conn.commit()
 
 
@@ -382,7 +752,6 @@ def del_row_Clients(id_client):
 def del_row_Car_by_id(id_client):
     cursor.execute("""delete from Car
                       where id=?""", (id_client,))
-
     conn.commit()
 
 
@@ -390,6 +759,38 @@ def del_row_Car_by_id(id_client):
 def del_row_Car_by_client(client):
     cursor.execute("""delete from Car
                       where client=?""", (client,))
+    conn.commit()
+
+
+# delete rows in Category_goods table by parent
+def del_rows_Category_goods_by_parent(parent):
+    cursor.execute("""select element
+                        from Category_goods
+                        where parent=?""", parent)
+
+    for i in cursor.fetchall():
+        del_rows_Category_goods_by_parent(i)
+
+    cursor.execute("""delete from Goods
+                        where category=?""", parent)
+
+    cursor.execute("""delete from Category_goods
+                      where element=?""", parent)
+
+    conn.commit()
+
+
+# delete row in Goods table
+def del_row_Goods_by_id(id_product):
+    cursor.execute("""delete from Goods
+                    where id=?""", (id_product,))
+
+    conn.commit()
+
+
+# alter column in Goods table
+def alt_col_Goods():
+    cursor.execute("""alter table Goods add column image blob""")
 
     conn.commit()
 
@@ -409,15 +810,17 @@ def upd():
 
 
 def del_table():
-    cursor.execute("""drop table Car""")
+    cursor.execute("""drop table LocalizationTab""")
 
 
 # Select
 def sel():
-    cursor.execute("""select model
-                      from Car
-                      where mark='Honda'""")
+    cursor.execute("""select *
+                    from Goods""")
 
     return cursor.fetchall()
+
+# print(sel())
+
 
 # conn.commit()

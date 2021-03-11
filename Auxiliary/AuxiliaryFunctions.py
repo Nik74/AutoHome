@@ -1,4 +1,8 @@
 from tkinter import ttk
+from tkinter import *
+
+import pyperclip
+import SQLite
 
 
 # to sort the table by column when clicking in column
@@ -22,3 +26,43 @@ def treeview_sort_column(treeview: ttk.Treeview, column, reverse: bool):
         text=column,
         command=lambda _col=column: treeview_sort_column(treeview, _col, not reverse),
     )
+
+
+# function for updating information about Category_goods table
+def aux_func():
+    category = SQLite.sel_element_category_goods_by_parent()
+
+    category.reverse()
+
+    result = []
+
+    for j in category:
+        result.append(j[0])
+
+    return result
+
+
+# function for save image
+def write_file(data, filename):
+    try:
+        with open(filename, 'wb') as file:
+            file.write(data)
+    except TypeError:
+        with open(filename, 'w') as file:
+            file.write(data)
+
+
+# copy and paste on RUS keyboard layout
+def keypress(e):
+    if e.keycode == 86 and e.keysym != 'v':
+        try:
+            e.widget.delete("sel.first", "sel.last")
+        except:
+            pass
+
+        e.widget.insert(e.widget.index(INSERT), pyperclip.paste())
+    elif e.keycode == 67 and e.keysym != 'c':
+        try:
+            pyperclip.copy(e.widget.selection_get())
+        except:
+            pass

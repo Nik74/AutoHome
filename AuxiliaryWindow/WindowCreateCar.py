@@ -7,8 +7,6 @@ from Auxiliary import AuxiliaryGlobalObject as AGO
 import SQLite
 import datetime
 
-path_logo_ico = 'img/logo.ico'
-
 _ = AGO.t.gettext
 
 
@@ -227,11 +225,13 @@ def frame_inf(frame, id_car):
 
 
 class WindowCreateCar(Toplevel):
-    def __init__(self, id=None):
-        super().__init__()
+    def __init__(self, id=None, parent=None):
+        super().__init__(parent)
+
+        self.grab_set()
 
         self.title(_("Create car"))
-        self.iconbitmap(path_logo_ico)
+        self.iconbitmap(AGO.path_logo_ico)
 
         style = ttk.Style()
         style.theme_use('vista')
@@ -246,13 +246,23 @@ class WindowCreateCar(Toplevel):
         def save_client():
             inf_car = list()
 
+            check_lic_plate_num = SQLite.sel_license_plate_number_from_car()
+
             if car.get('Mark').get() == '':
-                messagebox.showwarning(_("Warning"), _('The "Mark" field is not completed'),
+                messagebox.showwarning(_("Warning"),
+                                       _('The "Mark" field is not completed'),
                                        parent=self)
                 return 0
 
             if tuple([car.get('Client').get()]) not in SQLite.sel_client_from_clients():
-                messagebox.showwarning(_("Warning"), _('Such a client does not exist'),
+                messagebox.showwarning(_("Warning"),
+                                       _('Such a client does not exist'),
+                                       parent=self)
+                return 0
+
+            if car.get('License_plate_number').get() == '':
+                messagebox.showwarning(_("Warning"),
+                                       _('The "License plate number" field is not completed'),
                                        parent=self)
                 return 0
 
@@ -267,7 +277,12 @@ class WindowCreateCar(Toplevel):
 
                 SQLite.upd_Car(inf_car)
             else:
-                SQLite.ins_Car(inf_car)
+                if (car.get('License_plate_number').get(),) in check_lic_plate_num:
+                    inf_car.append(car.get('License_plate_number').get())
+
+                    SQLite.upd_Car_by_license_plate_number(inf_car)
+                else:
+                    SQLite.ins_Car(inf_car)
 
         # Save and exit
         def save_client_and_exit():

@@ -1,30 +1,27 @@
 # encoding: utf-8
 
+import pyperclip
+import gettext
+
 from win32api import GetSystemMetrics
 from tkinter import *
 from tkinter import ttk
 from Auxiliary import AuxiliaryFunctions as AF
 
-import gettext
-
 # height and width of window
 height_window = GetSystemMetrics(1)
 width_window = GetSystemMetrics(0)
 
-'''height_window = 1024
-width_window = 1280'''
-
 height_program = int(GetSystemMetrics(1) / 1.5)
 width_program = int(GetSystemMetrics(0) / 2)
-
-'''height_program = int(1024 / 2.025)
-width_program = int(1280 / 2.5)'''
 
 # object for translate message
 t = gettext.translation('messages', './locale', languages=['ru'])
 t.install()
 
 _ = t.gettext
+
+path_logo_ico = 'img/logo.ico'
 
 
 # Class for Button
@@ -48,6 +45,32 @@ class CreateEntry(Entry):
         super().__init__(master)
 
         self.text = StringVar()
+
+        self.bind("<Control-KeyPress>", AF.keypress)
+
+        '''def func(e):
+            def func_paste():
+                try:
+                    e.widget.delete("sel.first", "sel.last")
+                except:
+                    pass
+
+                e.widget.insert(e.widget.index(INSERT), pyperclip.paste())
+
+            def func_copy():
+                try:
+                    pyperclip.copy(e.widget.selection_get())
+                except:
+                    pass
+
+            menu = Menu(e.widget, tearoff=0)
+
+            menu.add_command(label=_("Paste"), command=func_paste)
+            menu.add_command(label=_("Copy"), command=func_copy)
+
+            menu.post(e.x_root, e.y_root)
+
+        self.bind("<ButtonRelease-3>", func)'''
 
         self.config(textvariable=self.text)
 
@@ -102,6 +125,7 @@ class CreateCombobox(ttk.Combobox):
 
             self.current(list_box.index(item))
 
+        self.bind("<Control-KeyPress>", AF.keypress)
         self.bind("<Button-1>", command)
 
         self.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
@@ -114,6 +138,8 @@ class CreateText(Text):
 
         self.config(height=height)
 
+        self.bind("<Control-KeyPress>", AF.keypress)
+
         self.insert(1.0, item)
 
         self.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
@@ -122,10 +148,10 @@ class CreateText(Text):
 # Class for ttk.Treeview
 class CreateTreeview(ttk.Treeview):
     def __init__(self, master=None, height=None, headings=None, rows=None,
-                 row=0, column=0, sticky='ew', columnspan=1):
+                 row=None, column=None, sticky='ew', columnspan=1, selectmode="browse"):
         super().__init__(master)
 
-        self.config(show='headings', selectmode="browse", height=height)
+        self.config(show='headings', selectmode=selectmode, height=height)
 
         if headings is not None:
             self["columns"] = headings
@@ -147,7 +173,8 @@ class CreateTreeview(ttk.Treeview):
             for r in rows:
                 self.insert('', END, values=tuple(r))
 
-        self.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
+        if row is not None:
+            self.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
 
 
 # Class for Autocomplete Combobox
@@ -161,9 +188,12 @@ class AutocompleteCombobox(ttk.Combobox):
 
         if item != '':
             new_len = len(item)
+
             self.configure(width=new_len + 2)
 
             self.current(list_box.index(item))
+
+        self.bind("<Control-KeyPress>", AF.keypress)
 
         self.bind(events, command)
 
@@ -173,7 +203,8 @@ class AutocompleteCombobox(ttk.Combobox):
 
     def set_completion_list(self, completion_list):
         """Use our completion list as our drop down selection menu, arrows move through menu."""
-        self._completion_list = sorted(completion_list, key=str)  # Work with a sorted list
+        # self._completion_list = sorted(completion_list, key=str)  # Work with a sorted list
+        self._completion_list = completion_list
         self._hits = []
         self._hit_index = 0
         self.position = 0

@@ -2,12 +2,10 @@
 
 from tkinter import *
 from tkinter import ttk, messagebox
-from Auxiliary import AuxiliaryGlobalObject as AGO, AuxiliaryFunctions as AF
+from Auxiliary import AuxiliaryGlobalObject as AGO
 from AuxiliaryWindow import WindowCreateCar as WCCar
 
 import SQLite
-
-path_logo_ico = 'img/logo.ico'
 
 _ = AGO.t.gettext
 
@@ -411,7 +409,7 @@ def frame_all_inf(frame, client):
         table = AGO.CreateTreeview(master=frame_all, height=4, headings=headings,
                                    rows=rows, row=2, column=1, columnspan=100)
 
-        table.column(_('Name'), anchor='w', width=300)
+        table.column(_('Name'), anchor='w', width=400)
 
         def select(e):
             item = table.item(table.selection())
@@ -482,10 +480,13 @@ def frame_all_inf(frame, client):
 
 
 class WindowCreateClient(Toplevel):
-    def __init__(self, id=None):
-        super().__init__()
+    def __init__(self, id=None, parent=None):
+        super().__init__(parent)
+
+        self.grab_set()
+
         self.title(_("Create client"))
-        self.iconbitmap(path_logo_ico)
+        self.iconbitmap(AGO.path_logo_ico)
         self.wm_state('zoomed')
 
         style = ttk.Style()
@@ -501,8 +502,11 @@ class WindowCreateClient(Toplevel):
         def save_client():
             inf_client = list()
 
+            check_phone_number = SQLite.sel_phone_number_from_client()
+
             if client.get('client').get() == '':
-                messagebox.showwarning(_("Warning"), _('The "client" field is not completed'),
+                messagebox.showwarning(_("Warning"),
+                                       _('The "client" field is not completed'),
                                        parent=self)
 
                 return 0
@@ -510,6 +514,13 @@ class WindowCreateClient(Toplevel):
             if len(client.get('phone_number').get()) > 12 or \
                     len(client.get('other_phone_number').get()) > 12:
                 messagebox.showwarning(_("Warning"), _('Phone number length error'),
+                                       parent=self)
+
+                return 0
+
+            if client.get('phone_number').get() == '':
+                messagebox.showwarning(_("Warning"),
+                                       _('The "phone_number" field is not completed'),
                                        parent=self)
 
                 return 0
@@ -530,7 +541,12 @@ class WindowCreateClient(Toplevel):
 
                 SQLite.upd_Clients(inf_client)
             else:
-                SQLite.ins_Client(inf_client)
+                if (client.get('phone_number').get(),) in check_phone_number:
+                    inf_client.append(client.get('phone_number').get())
+
+                    SQLite.upd_Client_by_phone_number(inf_client)
+                else:
+                    SQLite.ins_Client(inf_client)
 
         # Save and exit
         def save_client_and_exit():
