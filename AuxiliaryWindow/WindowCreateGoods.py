@@ -1,4 +1,5 @@
 # here a window is created for adding a product
+
 import os
 import PIL
 import SQLite

@@ -211,6 +211,14 @@ def create_table_category_goods():
                     element_number integer)""")
 
 
+# Create table for payment categories
+# category_name - название
+def create_table_payment_categories():
+    cursor.execute("""create table Payment_categories
+                    (id integer not null primary key,
+                    category_name text)""")
+
+
 # Outputs everything from the tab table
 def sel_from_tab():
     cursor.execute("""select tab.*, lt.element_ru
@@ -587,6 +595,22 @@ def sel_from_goods_by_product_name(product, category):
         return ''
 
 
+# select all from Payment_categories table
+def sel_from_payment_categories():
+    cursor.execute("""select *
+                    from Payment_categories""")
+
+    return cursor.fetchall()
+
+
+# select category_name from Payment_categories table
+def sel_category_name_from_payment_categories():
+    cursor.execute("""select category_name
+                    from Payment_categories""")
+
+    return cursor.fetchall()
+
+
 # insert in table Clients
 def ins_Client(client):
     cursor.execute("""insert into Clients(client, type_client, category, source, discount_on_works, 
@@ -629,6 +653,14 @@ def ins_Goods(product):
                         mark_up_amount, cost_sales_balances,
                         description, image)
                        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", product)
+    conn.commit()
+
+
+# insert in Payment_categories table
+def ins_Payment_categories(category_name):
+    cursor.execute("""insert into Payment_categories(category_name)
+                    values (?)""", (category_name,))
+
     conn.commit()
 
 
@@ -788,6 +820,14 @@ def del_row_Goods_by_id(id_product):
     conn.commit()
 
 
+# delete row in Payment_categories by id
+def del_row_Payment_categories_by_id(id_category):
+    cursor.execute("""delete from Payment_categories
+                    where id=?""", (id_category,))
+
+    conn.commit()
+
+
 # alter column in Goods table
 def alt_col_Goods():
     cursor.execute("""alter table Goods add column image blob""")
@@ -816,11 +856,10 @@ def del_table():
 # Select
 def sel():
     cursor.execute("""select *
-                    from Goods""")
+                    from Payment_categories""")
 
     return cursor.fetchall()
 
-# print(sel())
+#print(sel())
 
-
-# conn.commit()
+#conn.commit()

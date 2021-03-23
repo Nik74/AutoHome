@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-import pyperclip
 import gettext
 
 from win32api import GetSystemMetrics
@@ -48,29 +47,7 @@ class CreateEntry(Entry):
 
         self.bind("<Control-KeyPress>", AF.keypress)
 
-        '''def func(e):
-            def func_paste():
-                try:
-                    e.widget.delete("sel.first", "sel.last")
-                except:
-                    pass
-
-                e.widget.insert(e.widget.index(INSERT), pyperclip.paste())
-
-            def func_copy():
-                try:
-                    pyperclip.copy(e.widget.selection_get())
-                except:
-                    pass
-
-            menu = Menu(e.widget, tearoff=0)
-
-            menu.add_command(label=_("Paste"), command=func_paste)
-            menu.add_command(label=_("Copy"), command=func_copy)
-
-            menu.post(e.x_root, e.y_root)
-
-        self.bind("<ButtonRelease-3>", func)'''
+        self.bind("<ButtonRelease-3>", AF.button_3)
 
         self.config(textvariable=self.text)
 
@@ -127,6 +104,7 @@ class CreateCombobox(ttk.Combobox):
 
         self.bind("<Control-KeyPress>", AF.keypress)
         self.bind("<Button-1>", command)
+        self.bind("<ButtonRelease-3>", AF.button_3)
 
         self.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
 
@@ -139,6 +117,7 @@ class CreateText(Text):
         self.config(height=height)
 
         self.bind("<Control-KeyPress>", AF.keypress)
+        self.bind("<ButtonRelease-3>", AF.button_3)
 
         self.insert(1.0, item)
 
@@ -194,6 +173,7 @@ class AutocompleteCombobox(ttk.Combobox):
             self.current(list_box.index(item))
 
         self.bind("<Control-KeyPress>", AF.keypress)
+        self.bind("<ButtonRelease-3>", AF.button_3)
 
         self.bind(events, command)
 

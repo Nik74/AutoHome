@@ -3,6 +3,13 @@ from tkinter import *
 
 import pyperclip
 import SQLite
+import gettext
+
+# object for translate message
+t = gettext.translation('messages', './locale', languages=['ru'])
+t.install()
+
+_ = t.gettext
 
 
 # to sort the table by column when clicking in column
@@ -66,3 +73,27 @@ def keypress(e):
             pyperclip.copy(e.widget.selection_get())
         except:
             pass
+
+
+# function for the right mouse button
+def button_3(e):
+    def func_paste():
+        try:
+            e.widget.delete("sel.first", "sel.last")
+        except:
+            pass
+
+        e.widget.insert(e.widget.index(INSERT), pyperclip.paste())
+
+    def func_copy():
+        try:
+            pyperclip.copy(e.widget.selection_get())
+        except:
+            pass
+
+    menu = Menu(e.widget, tearoff=0)
+
+    menu.add_command(label=_("Paste"), command=func_paste)
+    menu.add_command(label=_("Copy"), command=func_copy)
+
+    menu.post(e.x_root, e.y_root)
