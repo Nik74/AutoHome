@@ -43,10 +43,11 @@ def create_table_tab():
                 ('Staff', 'Guides', 3),
                 ('Type of repair', 'Guides', 4),
                 ('Categories of payments', 'Guides', 5),
-                ('Providers', 'Guides', 6),
-                ('Users', 'Guides', 7),
-                ('Our company', 'Guides', 8),
-                ('Clients', 'Guides', 9),
+                ('Payment storage locations', 'Guides', 6),
+                ('Providers', 'Guides', 7),
+                ('Users', 'Guides', 8),
+                ('Our company', 'Guides', 9),
+                ('Clients', 'Guides', 10),
                 ('Car service', '', 0),
                 ('Opening a work order', 'Car service', 0),
                 ('Closed orders', 'Car service', 1),
@@ -89,15 +90,16 @@ def create_table_localization_tab():
                 ('tab', 20, 'Staff', 'Сотрудники'),
                 ('tab', 21, 'Type of repair', 'Вид ремонта'),
                 ('tab', 22, 'Categories of payments', 'Категории платежей'),
-                ('tab', 23, 'Providers', 'Поставщики'),
-                ('tab', 24, 'Users', 'Пользователи'),
-                ('tab', 25, 'Our company', 'Наши компании'),
-                ('tab', 26, 'Clients', 'Клиенты'),
-                ('tab', 27, 'Car service', 'Автосервис'),
-                ('tab', 28, 'Opening a work order', 'Открытие заказ-наряда'),
-                ('tab', 29, 'Closed orders', 'Все заказ-наряды'),
-                ('tab', 30, 'Post planner', 'Планировщик постов'),
-                ('tab', 31, 'Posts', 'Посты')]
+                ('tab', 23, 'Payment storage locations', 'Места хранения платежей'),
+                ('tab', 24, 'Providers', 'Поставщики'),
+                ('tab', 25, 'Users', 'Пользователи'),
+                ('tab', 26, 'Our company', 'Наши компании'),
+                ('tab', 27, 'Clients', 'Клиенты'),
+                ('tab', 28, 'Car service', 'Автосервис'),
+                ('tab', 29, 'Opening a work order', 'Открытие заказ-наряда'),
+                ('tab', 30, 'Closed orders', 'Все заказ-наряды'),
+                ('tab', 31, 'Post planner', 'Планировщик постов'),
+                ('tab', 32, 'Posts', 'Посты')]
 
     cursor.executemany("""insert into LocalizationTab 
                             (table_tab, id_tab, element, element_ru)
@@ -217,6 +219,14 @@ def create_table_payment_categories():
     cursor.execute("""create table Payment_categories
                     (id integer not null primary key,
                     category_name text)""")
+
+
+# Create table for payment storage locations
+# payment_storage_locations - место хранения платежей
+def create_table_payment_storage_locations():
+    cursor.execute("""create table Payment_storage_locations
+                    (id integer not null primary key,
+                    payment_storage_locations text)""")
 
 
 # Outputs everything from the tab table
@@ -611,6 +621,22 @@ def sel_category_name_from_payment_categories():
     return cursor.fetchall()
 
 
+# select payment storage locations from Payment_storage_locations table
+def sel_payment_storage_locations_from_payment_storage_locations():
+    cursor.execute("""select payment_storage_locations
+                    from Payment_storage_locations""")
+
+    return cursor.fetchall()
+
+
+# select all from Payment_storage_locations
+def sel_from_payment_storage_locations():
+    cursor.execute("""select *
+                    from Payment_storage_locations""")
+
+    return cursor.fetchall()
+
+
 # insert in table Clients
 def ins_Client(client):
     cursor.execute("""insert into Clients(client, type_client, category, source, discount_on_works, 
@@ -660,6 +686,14 @@ def ins_Goods(product):
 def ins_Payment_categories(category_name):
     cursor.execute("""insert into Payment_categories(category_name)
                     values (?)""", (category_name,))
+
+    conn.commit()
+
+
+# insert in Payment_storage_locations table
+def ins_Payment_storage_locations(paymnet_storage_locations):
+    cursor.execute("""insert into Payment_storage_locations(payment_storage_locations)
+                    values(?)""", (paymnet_storage_locations,))
 
     conn.commit()
 
@@ -828,6 +862,14 @@ def del_row_Payment_categories_by_id(id_category):
     conn.commit()
 
 
+# delete row in Payment_storage_locations by id
+def del_row_Payment_storage_locations_by_id(id_payment_storage_locations):
+    cursor.execute("""delete from Payment_storage_locations
+                    where id=?""", (id_payment_storage_locations,))
+
+    conn.commit()
+
+
 # alter column in Goods table
 def alt_col_Goods():
     cursor.execute("""alter table Goods add column image blob""")
@@ -862,4 +904,4 @@ def sel():
 
 #print(sel())
 
-#conn.commit()
+# conn.commit()
