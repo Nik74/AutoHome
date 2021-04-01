@@ -3,7 +3,8 @@
 from tkinter import *
 from tkinter import ttk
 from Auxiliary import AuxiliaryFunctionsForTree as AFT, AuxiliaryGlobalObject as AGO
-from Frames import FrameClients, FrameGoods, FramePaymentCategories, FramePaymentStorageLocations
+from Frames import FrameClients, FrameGoods, FramePaymentCategories, FramePaymentStorageLocations, \
+    FramePayments
 
 
 def create_tree_and_frames(frame, master=None):
@@ -54,6 +55,9 @@ def create_tree_and_frames(frame, master=None):
     # payment storage locations
     frame_payment_storage_locations = FramePaymentStorageLocations.FramePaymentStorageLocations(master=master)
 
+    # payments
+    frame_payments = FramePayments.FramePayments(master=master)
+
     def clicks(event):
         item = tree_view.identify('item', event.x, event.y)
 
@@ -76,6 +80,11 @@ def create_tree_and_frames(frame, master=None):
             AFT.pack_out(frame_payment_storage_locations)
         else:
             frame_payment_storage_locations.pack_forget()
+
+        if item == 'Payments':
+            AFT.pack_out(frame_payments)
+        else:
+            frame_payments.pack_forget()
 
         if item == '':
             try:

@@ -277,7 +277,7 @@ def frame_legal_entity(frame, item):
 def frame_inf(frame, id_client):
     frame_inform = Frame(frame)
 
-    item = ['' for _ in range(0, 27)]
+    item = ['' for x in range(0, 27)]
 
     if id_client is not None:
         sel_client = SQLite.sel_from_clients_all(id_client)
@@ -538,6 +538,11 @@ class WindowCreateClient(Toplevel):
 
             if id is not None:
                 inf_client.append(id)
+
+                old_name_client = SQLite.sel_client_from_clients_by_id(id)
+
+                if old_name_client[0][0] != client.get('client').get():
+                    SQLite.upd_Car_by_client(client.get('client').get(), old_name_client[0][0])
 
                 SQLite.upd_Clients(inf_client)
             else:

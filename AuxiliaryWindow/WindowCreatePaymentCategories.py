@@ -1,7 +1,7 @@
 # window for create payment categories
 
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from Auxiliary import AuxiliaryGlobalObject as AGO
 
 import SQLite
@@ -20,6 +20,9 @@ class WindowCreatePaymentCategories(Toplevel):
         self.title(_("Create payment categories"))
 
         self.iconbitmap(AGO.path_logo_ico)
+
+        style = ttk.Style()
+        style.theme_use('vista')
 
         # minsize: 5
         self.columnconfigure(0, {'minsize': int(AGO.width_window / 384)})
@@ -49,6 +52,11 @@ class WindowCreatePaymentCategories(Toplevel):
                 messagebox.showwarning(_("Warning"),
                                        _('The "Category name" field is not completed'),
                                        parent=self)
+
+        def save_for_return_button(e):
+            save_payment_categories()
+
+        category_name.bind('<Return>', save_for_return_button)
 
         # button
         AGO.CreateButton(master=self, text=_('Save'), row=3,

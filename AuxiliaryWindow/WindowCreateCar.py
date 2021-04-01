@@ -14,7 +14,7 @@ _ = AGO.t.gettext
 def frame_inf(frame, id_car):
     frame_inform = Frame(frame)
 
-    item = ['' for _ in range(0, 17)]
+    item = ['' for x in range(0, 17)]
 
     if id_car is not None:
         sel_car = SQLite.sel_from_car_all(id_car)
@@ -213,7 +213,7 @@ def frame_inf(frame, id_car):
     date_now = datetime.datetime.now()
 
     if item[16] == '':
-        item[16] = date_now.strftime('%d.%m.%Y %H:%M:%S')
+        item[16] = date_now.strftime('%Y-%m-%d')
 
     # entry created
     inf_car['Created'] = AGO.CreateEntry(master=frame_inform, item=item[16],
@@ -286,7 +286,6 @@ class WindowCreateCar(Toplevel):
 
         # Save and exit
         def save_client_and_exit():
-            pass
             err = save_client()
 
             if err is None:

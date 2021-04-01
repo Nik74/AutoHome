@@ -5,6 +5,7 @@ import gettext
 from win32api import GetSystemMetrics
 from tkinter import *
 from tkinter import ttk
+from tkcalendar import *
 from Auxiliary import AuxiliaryFunctions as AF
 
 # height and width of window
@@ -98,13 +99,12 @@ class CreateCombobox(ttk.Combobox):
 
         if item != '':
             new_len = len(item)
+
             self.configure(width=new_len + 2)
 
             self.current(list_box.index(item))
 
-        self.bind("<Control-KeyPress>", AF.keypress)
-        self.bind("<Button-1>", command)
-        self.bind("<ButtonRelease-3>", AF.button_3)
+        self.bind("<<ComboboxSelected>>", command)
 
         self.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
 
@@ -242,3 +242,25 @@ class AutocompleteCombobox(ttk.Combobox):
         # for the Cyrillic alphabet
         if 1072 < event.keysym_num < 1103:
             self.autocomplete()
+
+
+# class for DateEntry
+class CreateDateEntry(DateEntry):
+    def __init__(self, master=None, row=0, column=0, columnspan=1,
+                 item='', sticky='ew', date_pattern='dd.mm.yyyy',
+                 events=None, command=None):
+        super().__init__(master)
+
+        self.master = master
+
+        if item != '':
+            self.set_date(item)
+
+        self.config(locale='ru_RU', date_pattern=date_pattern, background='#b06e58',
+                    foreground='yellow', bordercolor='#caab54',
+                    headersbackground='#b88157', headersforeground='yellow',
+                    selectbackground='#bf9256', selectforeground='yellow')
+
+        self.bind(events, command)
+
+        self.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)

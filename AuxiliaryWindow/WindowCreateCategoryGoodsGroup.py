@@ -21,8 +21,6 @@ class WindowCreateCategoryGoodsGroup(Toplevel):
         style = ttk.Style()
         style.theme_use('vista')
 
-        # print(self.tk.eval('wm stackorder ' + str(self)+' isabove '+str(master)))
-
         def add_group():
             group_category = ()
 

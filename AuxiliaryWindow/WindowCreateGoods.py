@@ -328,8 +328,13 @@ class FrameInformationProduct(Frame):
                         column=1, sticky='w')
 
         def upd_mark_up_amount(e):
-            item[14] = round(int(self.product['sale_price'].get()) - \
-                             float(self.product['purchase_price'].get()), 2)
+            try:
+                item[14] = round(int(self.product['sale_price'].get()) - \
+                                 float(self.product['purchase_price'].get()), 2)
+            except ValueError:
+                messagebox.showwarning(_("Warning"),
+                                       _('The "Price..." field must be a number'),
+                                       parent=self)
 
             self.product['mark_up_amount'] = AGO.CreateEntry(master=frame_cost, row=4,
                                                              column=4, item=item[14]).text
@@ -347,9 +352,14 @@ class FrameInformationProduct(Frame):
                         sticky='w')
 
         def upd_sale_price(e):
-            item[13] = my_round(float(self.product['purchase_price'].get()) + \
-                                float(self.product['purchase_price'].get()) / 100 * \
-                                int(self.product['margin_percentage'].get()))
+            try:
+                item[13] = my_round(float(self.product['purchase_price'].get()) + \
+                                    float(self.product['purchase_price'].get()) / 100 * \
+                                    int(self.product['margin_percentage'].get()))
+            except ValueError:
+                messagebox.showwarning(_("Warning"),
+                                       _('The "Margin percentage" and "Purchase price" fields must be a number'),
+                                       parent=self)
 
             self.product['sale_price'] = AGO.CreateEntry(master=frame_cost, row=4,
                                                          column=2, item=item[13],

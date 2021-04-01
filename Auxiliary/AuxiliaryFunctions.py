@@ -1,3 +1,4 @@
+import os
 from tkinter import ttk
 from tkinter import *
 
@@ -97,3 +98,7 @@ def button_3(e):
     menu.add_command(label=_("Copy"), command=func_copy)
 
     menu.post(e.x_root, e.y_root)
+
+
+def printing_io(filename):
+    os.startfile(filename, "print")

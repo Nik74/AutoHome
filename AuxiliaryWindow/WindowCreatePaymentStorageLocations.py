@@ -1,7 +1,7 @@
 # create payment storage locations
 
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from Auxiliary import AuxiliaryGlobalObject as AGO
 
 import SQLite
@@ -20,6 +20,9 @@ class WindowCreatePaymentStorageLocations(Toplevel):
         self.title(_("Create payment storage locations"))
 
         self.iconbitmap(AGO.path_logo_ico)
+
+        style = ttk.Style()
+        style.theme_use('vista')
 
         # minsize: 5
         self.columnconfigure(0, {'minsize': int(AGO.width_window / 384)})
@@ -50,6 +53,11 @@ class WindowCreatePaymentStorageLocations(Toplevel):
                 messagebox.showwarning(_("Warning"),
                                        _('The "Payment storage location" field is not completed'),
                                        parent=self)
+
+        def save_for_return_button(e):
+            save_payment_storage_locations()
+
+        payment_storage_locations.bind('<Return>', save_for_return_button)
 
         # button
         AGO.CreateButton(master=self, text=_('Save'), row=3,

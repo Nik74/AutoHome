@@ -5,6 +5,7 @@ import SQLite
 import datetime
 
 from xhtml2pdf import pisa
+from Auxiliary import AuxiliaryFunctions as AF
 
 
 def template_price(id_product):
@@ -42,10 +43,6 @@ def template_price(id_product):
             flag = 1
 
     return xhtml
-
-
-def printing_io(filename):
-    os.startfile(filename, "print")
 
 
 def template_60x65(id_product):
@@ -109,7 +106,7 @@ def template_60x65(id_product):
     if not pdf.err:
         pdf.dest.close()
 
-        printing_io(filename_pdf)
+        AF.printing_io(filename_pdf)
 
         time.sleep(8)
         os.system('taskkill /im AcroRd32.exe /f')

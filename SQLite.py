@@ -2,6 +2,9 @@ import sqlite3
 
 
 # function for lower register
+from datetime import datetime, date
+
+
 def lower_string(_str):
     return _str.lower()
 
@@ -168,7 +171,7 @@ def create_table_car():
                     body_number text,
                     engine_number text,
                     client text,
-                    created text)""")
+                    created datetime)""")
 
 
 # Create table for goods
@@ -227,6 +230,30 @@ def create_table_payment_storage_locations():
     cursor.execute("""create table Payment_storage_locations
                     (id integer not null primary key,
                     payment_storage_locations text)""")
+
+
+# Create table for payments
+# payment_amount - сумма платежа, note - примечание,
+# payment_category - категория платежа,
+# payment_storage_locations - место хранения платежа,
+# payment_type - тип платежа, company - компания,
+# payment_date - дата платежа
+# date_create - дата создания платежа
+# move_from - откуда перемещать
+# move_to - куда перемещать
+def create_table_payments():
+    cursor.execute("""create table Payments
+                    (id integer not null primary key,
+                    payment_amount text,
+                    note text,
+                    payment_category text,
+                    payment_storage_locations text,
+                    payment_type text,
+                    company text,
+                    move_from text,
+                    move_to text,
+                    payment_date datetime,
+                    date_create datetime)""")
 
 
 # Outputs everything from the tab table
@@ -637,6 +664,94 @@ def sel_from_payment_storage_locations():
     return cursor.fetchall()
 
 
+# change after create order!!!!
+# select all from Payments table by payment_date
+def sel_from_payments_by_payment_date(date_from, date_to):
+    if type(date_from) == str:
+        date_from = datetime.strptime(date_from, '%d.%m.%Y')
+        date_to = datetime.strptime(date_to, '%d.%m.%Y')
+
+    date_from = date_from.strftime('%Y-%m-%d')
+
+    date_to = date_to.strftime('%Y-%m-%d')
+
+    cursor.execute("""select id, payment_date, payment_type,
+                        payment_storage_locations,
+                        payment_category, payment_amount,
+                        move_from, move_to, null, null, 
+                        date_create, null, null, company
+                    from Payments
+                    where payment_date between ? and ?""", (date_from, date_to))
+
+    return cursor.fetchall()
+
+
+# select from Payments table by id
+def sel_from_payments_by_id(id_payments):
+    cursor.execute("""select payment_amount, note,
+                        payment_category, payment_storage_locations,
+                        payment_type, company, payment_date, date_create
+                    from Payments
+                    where id=?""", (id_payments,))
+
+    return cursor.fetchall()
+
+
+# select from Payments table by id
+def sel_from_payments_by_id_for_transfer(id_transfer):
+    cursor.execute("""select payment_amount, move_from, move_to, 
+                        note, payment_type, company, 
+                        payment_date, date_create
+                    from Payments
+                    where id=?""", (id_transfer,))
+
+    return cursor.fetchall()
+
+
+# select sum(payment_amount) from Payments table
+def sel_sum_payment_amount_from_payments():
+    cursor.execute("""select sum(payment_amount)
+                    from Payments""")
+
+    return cursor.fetchall()
+
+
+# select max(payment_date) from Payments table
+def sel_max_payment_date_from_Payments():
+    cursor.execute("""select max(payment_date)
+                    from Payments""")
+
+    return cursor.fetchall()
+
+
+# select min(payment_date) from Payments table
+def sel_min_payment_date_from_Payments():
+    cursor.execute("""select min(payment_date)
+                    from Payments""")
+
+    return cursor.fetchall()
+
+
+# select payment_amount and payment_category from Payments table by id
+def sel_amount_category_from_payments_by_id(id_payments):
+    cursor.execute("""select payment_amount, payment_category
+                    from Payments
+                    where id=?""", (id_payments,))
+
+    return cursor.fetchall()
+
+
+# change after create order!!!!
+# select for print PKO from Payments table
+def sel_for_PKO_from_payments_by_id(id_payment):
+    cursor.execute("""select payment_date, id, payment_amount,
+                        null, payment_category
+                    from Payments
+                    where id=?""", (id_payment,))
+
+    return cursor.fetchall()
+
+
 # insert in table Clients
 def ins_Client(client):
     cursor.execute("""insert into Clients(client, type_client, category, source, discount_on_works, 
@@ -691,9 +806,36 @@ def ins_Payment_categories(category_name):
 
 
 # insert in Payment_storage_locations table
-def ins_Payment_storage_locations(paymnet_storage_locations):
+def ins_Payment_storage_locations(payment_storage_locations):
     cursor.execute("""insert into Payment_storage_locations(payment_storage_locations)
-                    values(?)""", (paymnet_storage_locations,))
+                    values(?)""", (payment_storage_locations,))
+
+    conn.commit()
+
+
+# insert in Payments table
+def ins_Payments(payment):
+    cursor.execute("""insert into Payments(payment_amount,
+                        note, payment_category,
+                        payment_storage_locations,
+                        payment_type, company,
+                        payment_date,
+                        date_create)
+                    values(?,?,?,?,?,?,?,?)""", payment)
+
+    conn.commit()
+
+
+# insert in Payments table
+def ins_Payments_for_transfer(transfer):
+    cursor.execute("""insert into Payments(payment_category,
+                        payment_amount,
+                        move_from, move_to,
+                        note, payment_type,
+                        company, payment_date,
+                        date_create,
+                        payment_storage_locations)
+                    values(?,?,?,?,?,?,?,?,?,?)""", transfer)
 
     conn.commit()
 
@@ -745,6 +887,15 @@ def upd_Car_by_license_plate_number(car):
     conn.commit()
 
 
+# update client in Car table by client
+def upd_Car_by_client(new_client, old_client):
+    cursor.execute("""update Car
+                        set client=?
+                    where client=?""", (new_client, old_client))
+
+    conn.commit()
+
+
 # update element in Category_goods table
 def upd_Category_goods_by_element(new_element, element):
     cursor.execute("""update Category_goods
@@ -792,6 +943,40 @@ def upd_Goods_by_article(product):
                         mark_up_amount=?, cost_sales_balances=?,
                         description=?, image=?
                       where article=?""", product)
+
+    conn.commit()
+
+
+# update row in Payments table by id
+def upd_payments_by_id(inf_payments):
+    cursor.execute("""update Payments
+                        set payment_amount=?,
+                        note=?,
+                        payment_category=?,
+                        payment_storage_locations=?,
+                        payment_type=?,
+                        company=?,
+                        payment_date=?,
+                        date_create=?
+                    where id=?""", inf_payments)
+
+    conn.commit()
+
+
+# update row in payments table by id for transfer funds
+def upd_payments_by_id_for_transfer(inf_transfer):
+    cursor.execute("""update Payments
+                        set payment_category=?,
+                        payment_amount=?,
+                        move_from=?,
+                        move_to=?,
+                        note=?,
+                        payment_type=?,
+                        company=?,
+                        payment_date=?,
+                        date_create=?,
+                        payment_storage_locations
+                    where id=?""", inf_transfer)
 
     conn.commit()
 
@@ -870,6 +1055,14 @@ def del_row_Payment_storage_locations_by_id(id_payment_storage_locations):
     conn.commit()
 
 
+# delete row in Payments table by id
+def del_row_Payments_by_id(id_payments):
+    cursor.execute("""delete from Payments
+                    where id=?""", (id_payments,))
+
+    conn.commit()
+
+
 # alter column in Goods table
 def alt_col_Goods():
     cursor.execute("""alter table Goods add column image blob""")
@@ -892,16 +1085,16 @@ def upd():
 
 
 def del_table():
-    cursor.execute("""drop table LocalizationTab""")
+    cursor.execute("""drop table Payments""")
 
 
 # Select
 def sel():
     cursor.execute("""select *
-                    from Payment_categories""")
+                    from Payments""")
 
     return cursor.fetchall()
 
 #print(sel())
 
-# conn.commit()
+#conn.commit()
