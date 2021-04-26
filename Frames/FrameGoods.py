@@ -88,10 +88,6 @@ class CanvasButtonTop(Canvas):
         AGO.CreateButton(master=self, text=_('Create a product'), row=0,
                          column=2, command=create_product)
 
-        # button open a card
-        AGO.CreateButton(master=self, text=_('Open a card'), row=0,
-                         column=3, bg='red')
-
 
 # Frame for goods tree
 class FrameGoodsTree(Canvas):

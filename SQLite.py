@@ -42,15 +42,14 @@ def create_table_tab():
                 ('Guides', '', 0),
                 ('Works', 'Guides', 0),
                 ('Goods', 'Guides', 1),
-                ('Brands models', 'Guides', 2),
-                ('Staff', 'Guides', 3),
-                ('Type of repair', 'Guides', 4),
-                ('Categories of payments', 'Guides', 5),
-                ('Payment storage locations', 'Guides', 6),
-                ('Providers', 'Guides', 7),
-                ('Users', 'Guides', 8),
-                ('Our company', 'Guides', 9),
-                ('Clients', 'Guides', 10),
+                ('Staff', 'Guides', 2),
+                ('Type of repair', 'Guides', 3),
+                ('Categories of payments', 'Guides', 4),
+                ('Payment storage locations', 'Guides', 5),
+                ('Providers', 'Guides', 6),
+                ('Users', 'Guides', 7),
+                ('Our company', 'Guides', 8),
+                ('Clients', 'Guides', 9),
                 ('Car service', '', 0),
                 ('Opening a work order', 'Car service', 0),
                 ('Closed orders', 'Car service', 1),
@@ -89,20 +88,19 @@ def create_table_localization_tab():
                 ('tab', 16, 'Guides', 'Справочники'),
                 ('tab', 17, 'Works', 'Работы'),
                 ('tab', 18, 'Goods', 'Товары'),
-                ('tab', 19, 'Brands models', 'Марки модели'),
-                ('tab', 20, 'Staff', 'Сотрудники'),
-                ('tab', 21, 'Type of repair', 'Вид ремонта'),
-                ('tab', 22, 'Categories of payments', 'Категории платежей'),
-                ('tab', 23, 'Payment storage locations', 'Места хранения платежей'),
-                ('tab', 24, 'Providers', 'Поставщики'),
-                ('tab', 25, 'Users', 'Пользователи'),
-                ('tab', 26, 'Our company', 'Наши компании'),
-                ('tab', 27, 'Clients', 'Клиенты'),
-                ('tab', 28, 'Car service', 'Автосервис'),
-                ('tab', 29, 'Opening a work order', 'Открытие заказ-наряда'),
-                ('tab', 30, 'Closed orders', 'Все заказ-наряды'),
-                ('tab', 31, 'Post planner', 'Планировщик постов'),
-                ('tab', 32, 'Posts', 'Посты')]
+                ('tab', 19, 'Staff', 'Сотрудники'),
+                ('tab', 20, 'Type of repair', 'Вид ремонта'),
+                ('tab', 21, 'Categories of payments', 'Категории платежей'),
+                ('tab', 22, 'Payment storage locations', 'Места хранения платежей'),
+                ('tab', 23, 'Providers', 'Поставщики'),
+                ('tab', 24, 'Users', 'Пользователи'),
+                ('tab', 25, 'Our company', 'Наши компании'),
+                ('tab', 26, 'Clients', 'Клиенты'),
+                ('tab', 27, 'Car service', 'Автосервис'),
+                ('tab', 28, 'Opening a work order', 'Открытие заказ-наряда'),
+                ('tab', 29, 'Closed orders', 'Все заказ-наряды'),
+                ('tab', 30, 'Post planner', 'Планировщик постов'),
+                ('tab', 31, 'Posts', 'Посты')]
 
     cursor.executemany("""insert into LocalizationTab 
                             (table_tab, id_tab, element, element_ru)
@@ -1085,16 +1083,17 @@ def upd():
 
 
 def del_table():
-    cursor.execute("""drop table Payments""")
+    cursor.execute("""drop table tab""")
 
 
 # Select
 def sel():
     cursor.execute("""select *
-                    from Payments""")
+                    from Category_goods
+                    where element='Детали для ТО'""")
 
     return cursor.fetchall()
 
-#print(sel())
+# print(sel())
 
-#conn.commit()
+# conn.commit()

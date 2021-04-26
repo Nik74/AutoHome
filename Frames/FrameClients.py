@@ -56,10 +56,6 @@ class FrameClients(Frame):
         AGO.CreateButton(master=self, text=_('Create an car client'),
                          row=0, column=2, command=create_car)
 
-        # button open card
-        AGO.CreateButton(master=self, text=_('Open a card'), bg='red', row=0,
-                         column=3, columnspan=2)
-
         # minsize: 15
         for i in range(1, 4):
             self.rowconfigure(i, {'minsize': int(AGO.height_window / 72)})
