@@ -1,7 +1,7 @@
 # AutoHome
 This is a test version of the car service program. In this program, you can create and store customers, cars, goods, completed works, etc.This program is in the process of development.
 
-To use the program, you need to add the jdk folder to the "./java" folder.
+To use the program, you need to add the jdk folder to the "./java" folder. Also, the location of the program folder should not contain Cyrillic characters.
 
 Some information about using the program:
 1. The database is located in the "SQLiteDB" folder;
@@ -19,6 +19,8 @@ Some information about using the program:
 13. In the "Payments" module, when creating a payment, you need to write a fractional number separated by a dot;
 14. In the "Payments" module, payments with the "Moved funds" category are not changed.
 
+
+v1.4.1: Removed the Brand Model module, and removed the Open Card button in the Clients and Goods modules.
 
 v1.4: Added the "Payments" module; create payments;printing of the cash receipt order.
 
